@@ -35,3 +35,7 @@ export async function todayTrips() {
   const snapshot = await database().collection("trips").where("timestamp", ">=", new Date(now.getTime() - 48 * 3600000).toISOString()).orderBy("timestamp", "desc").get();
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TripInput & { id: string; timestamp: string })).filter(trip => day(new Date(trip.timestamp)) === day(now));
 }
+
+export async function deleteTrip(id: string) {
+  await database().collection("trips").doc(id).delete();
+}
