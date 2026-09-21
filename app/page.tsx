@@ -7,6 +7,7 @@ export default function Home() {
   const revenue = trips.reduce((sum, trip) => sum + trip.revenue + trip.tip, 0);
   return (
     <main>
+      <p className="muted" role="note">Demo · Los viajes y las métricas de este panel son datos de ejemplo.</p>
       <header className="hero">
         <div><p className="eyebrow">BLACK DRIVER OS</p><h1>Good evening, Rodrigo.</h1><p className="muted">Drive with data. Earn with intention.</p></div>
         <div className="status"><span /> Shift active</div>
