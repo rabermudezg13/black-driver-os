@@ -55,6 +55,6 @@ El servidor asigna `timestamp` UTC al guardar; no representa la hora original de
 
 ## Estado del panel
 
-La página principal todavía es una demostración con datos de ejemplo. Los registros reales se comprueban en Firestore. Leerlos desde el panel requiere agregar autenticación del conductor antes de exponer los ingresos.
+La página principal muestra los viajes reales de hoy, con horario de Miami. Ingresa la misma clave del atajo para acceder. Se actualiza cada 30 segundos.
 
 Referencias: [Firebase Admin](https://firebase.google.com/docs/admin/setup) y [solicitudes API con Atajos](https://support.apple.com/guide/shortcuts/request-your-first-api-apd58d46713f/ios).

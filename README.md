@@ -22,4 +22,4 @@ npm run build
 
 `POST /api/trips` valida datos, exige una clave Bearer y guarda en Firestore. El encabezado opcional `Idempotency-Key` evita duplicados al reintentar; el atajo debe enviarlo siempre. Solo confirma después de guardar. `GET /api/trips` informa configuración sin publicar viajes ni claves.
 
-El panel aún muestra datos de demostración. No hay autenticación del panel, cola offline ni sincronización de lecturas implementadas.
+El panel consulta los viajes de hoy (America/New_York) con autenticación Bearer mediante la clave del atajo y actualiza cada 30 segundos. La clave solo permanece en memoria mientras la página está abierta. No hay cola offline.
