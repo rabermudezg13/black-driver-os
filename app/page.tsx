@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { dailyMetrics } from "../lib/daily-metrics";
 import type { TripInput } from "../lib/trips";
 type Trip = TripInput & { id: string; timestamp: string };
 const money = (value: number) => new Intl.NumberFormat("es-US", { style: "currency", currency: "USD" }).format(value);
@@ -39,7 +40,9 @@ export default function Home() {
     const timer = setInterval(() => { if (access.current) void refresh(access.current); }, 30000);
     return () => clearInterval(timer);
   }, []);
-  const revenue = trips?.reduce((sum, trip) => sum + trip.fare + trip.tip, 0) ?? 0;
+  const daily = dailyMetrics(trips ?? []);
+  const revenue = daily.total;
+  const clock = (time: number) => new Date(time).toLocaleTimeString("es-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit" });
   const waiting = trips?.reduce((sum, trip) => sum + trip.waitingMinutes, 0) ?? 0;
   return <main>
     <header className="hero"><div><p className="eyebrow">BLACK DRIVER OS</p><h1>Tus viajes, Rodrigo.</h1><p className="muted">Ingresos reales de tus viajes registrados.</p></div></header>
@@ -51,8 +54,12 @@ export default function Home() {
       <div className="actions"><button className="primary" disabled={busy}>{busy ? "Cargando…" : "Ver mis viajes"}</button></div>
     </form> : <>
       <p className="muted">Hoy · Hora de Miami · Actualizado {updated}</p>
+      <section className="metrics dailySummary" aria-label="Resumen del día">
+        <article><p>Total del día</p><strong>{money(daily.total)}</strong><small>Tarifas + propinas · Sin descontar gastos</small></article>
+        <article><p>Promedio por hora del día</p><strong>{daily.hourly === null ? "—" : `${money(daily.hourly)}/h`}</strong><small>{daily.hourly === null ? "Se necesitan dos viajes registrados a distintas horas" : `${clock(daily.first!)} – ${clock(daily.last!)} · ${daily.hours.toFixed(2)} h`}</small></article>
+      </section>
+      <p className="muted">Total del día ÷ tiempo entre el primer y el último registro, incluidas las pausas. Se usa la hora en que guardas cada viaje.</p>
       <section className="metrics">
-        <article><p>Ingresos de hoy</p><strong>{money(revenue)}</strong><small>Tarifas + propinas</small></article>
         <article><p>Viajes</p><strong>{trips.length}</strong><small>Hoy</small></article>
         <article><p>Promedio por viaje</p><strong>{money(trips.length ? revenue / trips.length : 0)}</strong><small>Incluye propinas</small></article>
         <article><p>Espera</p><strong>{waiting} min</strong><small>Total registrado</small></article>
