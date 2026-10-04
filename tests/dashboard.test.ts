@@ -11,6 +11,10 @@ test('dashboard protects private trips and never caches responses', async () => 
   assert.equal(result.status,401);
   assert.equal(result.headers.get('cache-control'),'no-store');
   assert.equal('trips' in await result.json(),false);
+  for (const date of ['2026-02-30', '2026-13-01', 'yesterday', '']) {
+   const response = await GET(new Request('https://example.com/api/dashboard?date='+encodeURIComponent(date), { headers: { Authorization: 'Bearer private-test' } }));
+   assert.equal(response.status, 400);
+  }
  } finally {if(before===undefined)delete process.env.SHORTCUTS_API_KEY;else process.env.SHORTCUTS_API_KEY=before;}
 });
 
