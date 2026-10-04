@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { miamiDay, type Prediction } from "../lib/predictions";
 const money = (value: number) => new Intl.NumberFormat("es-US", { style: "currency", currency: "USD" }).format(value);
-export default function PredictionJournal({ token }: { token: string }) {
+export default function PredictionJournal({ token, date: selectedDate }: { token: string; date: string }) {
   const [entries, setEntries] = useState<Prediction[]>([]);
-  const [date, setDate] = useState(() => miamiDay(new Date()));
+  const [date, setDate] = useState(selectedDate);
   const [plan, setPlan] = useState("");
   const [revenue, setRevenue] = useState("");
   const [notes, setNotes] = useState("");
@@ -18,6 +18,7 @@ export default function PredictionJournal({ token }: { token: string }) {
     if (!response.ok) throw new Error(data.error || "No se pudo cargar el diario");
     setEntries(data.predictions); setLoaded(true);
   }
+  useEffect(() => { setDate(selectedDate); }, [selectedDate]);
   useEffect(() => { void load().catch(e => setError(e.message)); }, [token]);
   async function save(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setMessage("");
@@ -40,10 +41,10 @@ export default function PredictionJournal({ token }: { token: string }) {
       <label htmlFor="prediction-notes">Motivos y notas</label><textarea id="prediction-notes" rows={3} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)} />
       <div className="actions"><button className="primary" disabled={busy}>{busy ? "Guardando…" : "Guardar predicción"}</button><button type="button" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await load(); } catch (e) { setError(e instanceof Error ? e.message : "Error de conexión"); } finally { setBusy(false); } }}>Actualizar comparación</button></div>
     </form>
-    <p className="muted">Últimas 100 predicciones. Ingresos reales = tarifas + propinas del día completo, sin descontar gastos. La comparación de hoy es parcial; las zonas y horarios se revisan leyendo tu plan y los viajes.</p>
+    <p className="muted">Predicciones de {selectedDate} entre las últimas 100 guardadas. Ingresos reales = tarifas + propinas del día completo, sin descontar gastos. La comparación de hoy es parcial; las zonas y horarios se revisan leyendo tu plan y los viajes.</p>
     {!loaded && !error && <p>Cargando diario…</p>}
-    {loaded && !entries.length && <p className="muted">Tu primera predicción aparecerá aquí.</p>}
-    {entries.map(entry => {
+    {loaded && !entries.filter(entry => entry.date === selectedDate).length && <p className="muted">No hay predicciones guardadas para esta fecha.</p>}
+    {entries.filter(entry => entry.date === selectedDate).map(entry => {
       const future = entry.date > miamiDay(new Date());
       return <article className="journalEntry" key={entry.id}>
         <h3>{entry.date} {entry.date === miamiDay(new Date()) ? "· En curso" : future ? "· Pendiente" : ""}</h3>
