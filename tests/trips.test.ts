@@ -13,3 +13,10 @@ test("reject invalid numbers rather than silently recording zero or NaN", () => 
     for (const value of [null, true, "", " ", "abc", "1,25", -1, Infinity, NaN, {}, [], 1000001]) assert.throws(() => parseTrip({ ...trip, [key]: value }));
   }
 });
+
+test("active filters are optional for existing shortcuts and validated independently of the service", () => {
+  assert.equal(parseTrip(trip).activeFilters, undefined);
+  for (const activeFilters of ["Black", "Black Premier", "Black Premier XL", "XL", "Black Premier XL Comfort"]) assert.equal(parseTrip({ ...trip, activeFilters }).activeFilters, activeFilters);
+  assert.equal(parseTrip({ ...trip, service: "XL", activeFilters: "Black Premier XL Comfort" }).activeFilters, "Black Premier XL Comfort");
+  for (const value of [null, [], true, "", "invalid"]) assert.throws(() => parseTrip({ ...trip, activeFilters: value }));
+});

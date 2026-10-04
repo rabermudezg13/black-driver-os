@@ -83,3 +83,20 @@ Disponible cuando se publique la actualización del diario.
 9. Abre la página principal e ingresa tu clave. Elige el mismo día para ver la predicción y compararla con los ingresos registrados.
 
 Cada envío crea una entrada nueva. Este endpoint no implementa reintentos idempotentes: antes de reenviar tras un error de conexión, consulta el diario para comprobar si se guardó.
+
+
+## Filtros activos al recibir la carrera
+
+Después de elegir el servicio del viaje, añade **Elegir de la lista** con el título «Filtros activos». La lista contiene combinaciones completas; elige una sola opción:
+
+- Black
+- Black Premier
+- Black Premier XL
+- XL
+- Black Premier XL Comfort
+
+Guarda la selección en una variable `FiltrosActivos`. En el cuerpo JSON del envío a `/api/trips`, añade la clave `activeFilters`, tipo **Texto**, y asigna esa variable. Mantén las demás claves y el mismo UUID para reintentar.
+
+El campo `service` indica qué servicio fue la carrera; `activeFilters` indica qué combinación tenías activada al recibirla. Los atajos anteriores pueden seguir enviando viajes sin este campo y aparecerán como «No registrados». No se infieren filtros de los viajes antiguos.
+
+La página principal muestra los filtros de cada carrera y un resumen por combinación, con cantidad de viajes, ingresos, promedio por viaje y espera registrada, para la fecha seleccionada.

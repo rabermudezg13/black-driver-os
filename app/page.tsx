@@ -71,9 +71,17 @@ export default function Home() {
       </section>
       <div className="actions"><button disabled={busy} onClick={() => void refresh(access.current)}>{busy ? "Actualizando…" : "Actualizar viajes"}</button><button disabled={busy} onClick={() => { access.current = ""; setTrips(null); setError(""); }}>Cerrar vista</button></div>
       <PredictionJournal token={access.current} date={date} />
+      <section className="card"><h2>Seguimiento por filtros activos</h2><p className="muted">Agrupado por los filtros que tenías activos al recibir cada carrera. Ingresos incluyen propinas.</p>
+        {[...new Set(trips.map(trip => trip.activeFilters ?? "No registrados"))].map(filters => {
+          const group = trips.filter(trip => (trip.activeFilters ?? "No registrados") === filters);
+          const total = group.reduce((sum, trip) => sum + trip.fare + trip.tip, 0);
+          return <div className="trip" key={filters}><div><strong>{filters}</strong><p>{group.length} viajes · Espera {group.reduce((sum, trip) => sum + trip.waitingMinutes, 0)} min</p></div><div className="money"><strong>{money(total)}</strong><p>Promedio {money(total / group.length)} por viaje</p></div></div>;
+        })}
+        {!trips.length && <p className="muted">Sin viajes para comparar en esta fecha.</p>}
+      </section>
       <section className="card"><div className="sectionTitle"><h2>Viajes del {date}</h2></div>
         {trips.length === 0 && <p className="muted">No hay viajes registrados para esta fecha.</p>}
-        {trips.map(trip => <div className="trip" key={trip.id}><div><strong>{trip.zone}</strong><p>{trip.service} · {new Date(trip.timestamp).toLocaleTimeString("es-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit" })}</p><p>{trip.miles} mi · {trip.tripMinutes} min · Espera {trip.waitingMinutes} min</p></div><div className="money"><strong>{money(trip.fare + trip.tip)}</strong><p>{money(trip.tip)} de propina</p><button className="deleteTrip" disabled={busy} onClick={() => void removeTrip(trip)} aria-label={`Borrar viaje de ${trip.zone} por ${money(trip.fare + trip.tip)}`}>Borrar</button></div></div>)}
+        {trips.map(trip => <div className="trip" key={trip.id}><div><strong>{trip.zone}</strong><p>Filtros activos: {trip.activeFilters ?? "No registrados"}</p><p>{trip.service} · {new Date(trip.timestamp).toLocaleTimeString("es-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit" })}</p><p>{trip.miles} mi · {trip.tripMinutes} min · Espera {trip.waitingMinutes} min</p></div><div className="money"><strong>{money(trip.fare + trip.tip)}</strong><p>{money(trip.tip)} de propina</p><button className="deleteTrip" disabled={busy} onClick={() => void removeTrip(trip)} aria-label={`Borrar viaje de ${trip.zone} por ${money(trip.fare + trip.tip)}`}>Borrar</button></div></div>)}
       </section><p className="muted">Se actualiza automáticamente cada 30 segundos.</p>
     </>}
   </main>;
