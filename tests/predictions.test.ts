@@ -4,6 +4,8 @@ import { miamiDay, parsePrediction } from "../lib/predictions";
 import { GET, POST } from "../app/api/predictions/route";
 test("predictions validate dates and reject invalid revenue", () => {
   const input = { date: "2026-10-04", plan: " Brickell por la tarde ", expectedRevenue: 200, notes: "" };
+  assert.equal(parsePrediction({ ...input, expectedRevenue: "250.50" }).expectedRevenue, 250.5);
+  for (const expectedRevenue of ["", " ", "abc", null, true, "1,25"]) assert.throws(() => parsePrediction({ ...input, expectedRevenue }));
   assert.equal(parsePrediction(input).plan, "Brickell por la tarde");
   for (const change of [{ date: "2026-02-30" }, { expectedRevenue: -1 }, { expectedRevenue: Infinity }, { plan: " " }]) assert.throws(() => parsePrediction({ ...input, ...change }));
 });
