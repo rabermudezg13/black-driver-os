@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { dailyMetrics } from "../lib/daily-metrics";
 import type { TripInput } from "../lib/trips";
+import PredictionJournal from "./prediction-journal";
 type Trip = TripInput & { id: string; timestamp: string };
 const money = (value: number) => new Intl.NumberFormat("es-US", { style: "currency", currency: "USD" }).format(value);
 export default function Home() {
@@ -65,6 +66,7 @@ export default function Home() {
         <article><p>Espera</p><strong>{waiting} min</strong><small>Total registrado</small></article>
       </section>
       <div className="actions"><button disabled={busy} onClick={() => void refresh(access.current)}>{busy ? "Actualizando…" : "Actualizar viajes"}</button><button disabled={busy} onClick={() => { access.current = ""; setTrips(null); setError(""); }}>Cerrar vista</button></div>
+      <PredictionJournal token={access.current} />
       <section className="card"><div className="sectionTitle"><h2>Viajes de hoy</h2></div>
         {trips.length === 0 && <p className="muted">Todavía no hay viajes hoy. Registra uno desde tu atajo y aparecerá aquí.</p>}
         {trips.map(trip => <div className="trip" key={trip.id}><div><strong>{trip.zone}</strong><p>{trip.service} · {new Date(trip.timestamp).toLocaleTimeString("es-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit" })}</p><p>{trip.miles} mi · {trip.tripMinutes} min · Espera {trip.waitingMinutes} min</p></div><div className="money"><strong>{money(trip.fare + trip.tip)}</strong><p>{money(trip.tip)} de propina</p><button className="deleteTrip" disabled={busy} onClick={() => void removeTrip(trip)} aria-label={`Borrar viaje de ${trip.zone} por ${money(trip.fare + trip.tip)}`}>Borrar</button></div></div>)}

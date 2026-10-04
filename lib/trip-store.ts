@@ -5,7 +5,7 @@ import type { TripInput } from "./trips";
 export function isStorageConfigured() {
   return Boolean(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY);
 }
-function database() {
+export function database() {
   const app = getApps().find(app => app.name === "trips") ?? initializeApp({ credential: cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
