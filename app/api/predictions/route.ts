@@ -1,6 +1,7 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { database, isStorageConfigured } from "../../../lib/trip-store";
+import { parseDay } from "../../../lib/dates";
 import { miamiDay, parsePrediction } from "../../../lib/predictions";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,9 +14,13 @@ function authorize(request: Request) {
 }
 export async function GET(request: Request) {
   const denied = authorize(request); if (denied) return denied;
+  const requestedDate = new URL(request.url).searchParams.get("date");
+  if (requestedDate !== null) { try { parseDay(requestedDate); } catch { return reply({ error: "Fecha inválida" }, 400); } }
   try {
     const db = database();
-    const snapshot = await db.collection("predictions").orderBy("createdAt", "desc").limit(100).get();
+    const snapshot = requestedDate === null
+      ? await db.collection("predictions").orderBy("createdAt", "desc").limit(100).get()
+      : await db.collection("predictions").where("date", "==", requestedDate).get();
     const dates = [...new Set(snapshot.docs.map(doc => doc.data().date as string))];
     const totals = new Map(await Promise.all(dates.map(async date => {
       const start = new Date(`${date}T00:00:00Z`);
