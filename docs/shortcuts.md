@@ -55,7 +55,7 @@ El servidor asigna `timestamp` UTC al guardar; no representa la hora original de
 
 ## Estado del panel
 
-La página principal permite elegir la fecha de los viajes, con horario de Miami. Ingresa la misma clave del atajo para acceder. Se actualiza cada 30 segundos. El diario muestra las predicciones de la fecha seleccionada entre las últimas 100 entradas.
+La página principal permite elegir la fecha de los viajes, con horario de Miami. Ingresa la misma clave del atajo para acceder. Se actualiza cada 30 segundos. El diario muestra las predicciones de la fecha seleccionada del día elegido.
 
 Referencias: [Firebase Admin](https://firebase.google.com/docs/admin/setup) y [solicitudes API con Atajos](https://support.apple.com/guide/shortcuts/request-your-first-api-apd58d46713f/ios).
 

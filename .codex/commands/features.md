@@ -9,7 +9,7 @@
 ## Diario de predicciones
 - Guardar fecha, zonas y horarios previstos, ingresos esperados y notas en Firebase.
 - Conservar la fecha de creación de cada predicción.
-- Mostrar las predicciones de la fecha seleccionada entre las últimas 100 entradas.
+- Mostrar las predicciones de la fecha seleccionada.
 - Comparar ingresos esperados con tarifas y propinas registradas del día completo.
 - Indicar cuando la comparación está en curso o no hay viajes registrados.
 
@@ -23,3 +23,8 @@
 - Mantener `service` separado: representa el servicio de la carrera.
 - Mostrar los filtros por viaje y agrupar ingresos, viajes, promedio y espera por combinación.
 - Conservar compatibilidad con atajos anteriores; mostrar «No registrados» cuando falte el dato.
+
+## Calendario de actividad
+- Marcar con un punto verde los días con viajes o predicciones.
+- Consultar solo el mes visible, con autenticación y horario de Miami.
+- Actualizar los puntos al guardar predicciones, refrescar viajes o borrar registros.

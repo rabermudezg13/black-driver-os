@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { miamiDay, type Prediction } from "../lib/predictions";
 const money = (value: number) => new Intl.NumberFormat("es-US", { style: "currency", currency: "USD" }).format(value);
-export default function PredictionJournal({ token, date: selectedDate }: { token: string; date: string }) {
+export default function PredictionJournal({ token, date: selectedDate, onSaved }: { token: string; date: string; onSaved: () => void }) {
   const [entries, setEntries] = useState<Prediction[]>([]);
   const [date, setDate] = useState(selectedDate);
   const [plan, setPlan] = useState("");
@@ -12,21 +12,27 @@ export default function PredictionJournal({ token, date: selectedDate }: { token
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState("");
-  async function load() {
-    const response = await fetch("/api/predictions", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+  async function load(signal?: AbortSignal) {
+    const response = await fetch(`/api/predictions?date=${encodeURIComponent(selectedDate)}`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store", signal });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "No se pudo cargar el diario");
-    setEntries(data.predictions); setLoaded(true);
+    if (signal?.aborted) return;
+    setEntries(data.predictions.sort((a: Prediction, b: Prediction) => b.createdAt.localeCompare(a.createdAt))); setLoaded(true);
   }
   useEffect(() => { setDate(selectedDate); }, [selectedDate]);
-  useEffect(() => { void load().catch(e => setError(e.message)); }, [token]);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoaded(false); setError(""); setEntries([]);
+    void load(controller.signal).catch(e => { if (!controller.signal.aborted) setError(e.message); });
+    return () => controller.abort();
+  }, [token, selectedDate]);
   async function save(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setMessage("");
     try {
       const response = await fetch("/api/predictions", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ date, plan, expectedRevenue: Number(revenue), notes }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "No se pudo guardar");
-      setPlan(""); setRevenue(""); setNotes(""); setMessage("Predicción guardada."); await load();
+      setPlan(""); setRevenue(""); setNotes(""); setMessage("Predicción guardada."); onSaved(); await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Error de conexión"); }
     finally { setBusy(false); }
   }
@@ -41,7 +47,7 @@ export default function PredictionJournal({ token, date: selectedDate }: { token
       <label htmlFor="prediction-notes">Motivos y notas</label><textarea id="prediction-notes" rows={3} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)} />
       <div className="actions"><button className="primary" disabled={busy}>{busy ? "Guardando…" : "Guardar predicción"}</button><button type="button" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await load(); } catch (e) { setError(e instanceof Error ? e.message : "Error de conexión"); } finally { setBusy(false); } }}>Actualizar comparación</button></div>
     </form>
-    <p className="muted">Predicciones de {selectedDate} entre las últimas 100 guardadas. Ingresos reales = tarifas + propinas del día completo, sin descontar gastos. La comparación de hoy es parcial; las zonas y horarios se revisan leyendo tu plan y los viajes.</p>
+    <p className="muted">Predicciones de {selectedDate}. Ingresos reales = tarifas + propinas del día completo, sin descontar gastos. La comparación de hoy es parcial; las zonas y horarios se revisan leyendo tu plan y los viajes.</p>
     {!loaded && !error && <p>Cargando diario…</p>}
     {loaded && !entries.filter(entry => entry.date === selectedDate).length && <p className="muted">No hay predicciones guardadas para esta fecha.</p>}
     {entries.filter(entry => entry.date === selectedDate).map(entry => {
