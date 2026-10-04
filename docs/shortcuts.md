@@ -55,6 +55,31 @@ El servidor asigna `timestamp` UTC al guardar; no representa la hora original de
 
 ## Estado del panel
 
-La página principal muestra los viajes reales de hoy, con horario de Miami. Ingresa la misma clave del atajo para acceder. Se actualiza cada 30 segundos.
+La página principal permite elegir la fecha de los viajes, con horario de Miami. Ingresa la misma clave del atajo para acceder. Se actualiza cada 30 segundos. El diario muestra las predicciones de la fecha seleccionada entre las últimas 100 entradas.
 
 Referencias: [Firebase Admin](https://firebase.google.com/docs/admin/setup) y [solicitudes API con Atajos](https://support.apple.com/guide/shortcuts/request-your-first-api-apd58d46713f/ios).
+
+
+## Crear el atajo «Guardar predicción»
+
+Disponible cuando se publique la actualización del diario.
+
+1. Añade **Solicitar entrada** de tipo fecha para el día que quieres predecir. Usa **Dar formato a fecha**, formato personalizado `yyyy-MM-dd` (por ejemplo `2026-10-04`). El día debe corresponder a Miami.
+2. Solicita texto para el plan: zonas, horarios y demanda esperada.
+3. Solicita un **Número** para ingresos esperados, incluidas las propinas.
+4. Solicita texto para motivos y notas; puede quedar vacío.
+5. Añade **Obtener contenido de URL**: `https://black-driver-os-iack.vercel.app/api/predictions`, método **POST**.
+6. Encabezados: `Authorization: Bearer TU_SHORTCUTS_API_KEY` y `Content-Type: application/json`. Usa la misma clave del atajo de viajes.
+7. Cuerpo **JSON** con estas claves y variables:
+
+| Clave | Tipo | Ejemplo |
+| --- | --- | --- |
+| date | Texto | 2026-10-04 |
+| plan | Texto | Brickell 4–6 PM; Miami Beach 7–10 PM |
+| expectedRevenue | Número | 250 |
+| notes | Texto | Espero demanda de hoteles y cenas |
+
+8. Lee `ok` de la respuesta. Solo si es verdadero muestra «Predicción guardada». En otro caso muestra `error`; ante un error de conexión no muestres confirmación.
+9. Abre la página principal e ingresa tu clave. Elige el mismo día para ver la predicción y compararla con los ingresos registrados.
+
+Cada envío crea una entrada nueva. Este endpoint no implementa reintentos idempotentes: antes de reenviar tras un error de conexión, consulta el diario para comprobar si se guardó.
